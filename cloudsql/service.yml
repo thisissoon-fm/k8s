@@ -1,0 +1,16 @@
+#
+# Cloud SQL Proxy Service
+#
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudsql-svc
+spec:
+  ports:
+  - port: 5432
+    targetPort: cloudsql-port
+  selector:
+    app: cloudsql
+    tier: backend
+    env: prod

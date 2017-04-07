@@ -1,0 +1,42 @@
+#
+# Cloud SQL Proxy Controller
+#
+
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: cloudsql-rc
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: cloudsql
+        tier: backend
+        env: prod
+    spec:
+      # Volumes
+      volumes:
+      - name: cloudsql-service-token
+        secret:
+          secretName: cloudsql-service-token
+      - name: cloudsql
+        emptyDir:
+      # Containers
+      containers:
+      - image: gcr.io/cloudsql-docker/gce-proxy:1.09
+        name: cloudsql
+        command:
+          - "/cloud_sql_proxy"
+          - "--dir=/cloudsql"
+          - "-instances=[soon-fm-production:europe-west1:prod]=tcp:5432"
+          - "-credential_file=/secrets/cloudsql/credentials.json"
+        ports:
+          - name: cloudsql-port
+            containerPort: 5432
+        volumeMounts:
+        - name: cloudsql-service-token
+          mountPath: /secrets/cloudsql
+          readOnly: true
+        - name: cloudsql
+          mountPath: /cloudsql
